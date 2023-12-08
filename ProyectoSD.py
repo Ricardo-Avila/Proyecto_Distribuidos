@@ -102,3 +102,5 @@ threading.Thread(target=sucursal_2.iniciar_servidor).start()
 # nodo_maestro.consenso()
 # nodo_maestro.redistribuir_articulos()
 # nodo_maestro.eleccion()
+
+Esto es un cambio

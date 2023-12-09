@@ -1,0 +1,72 @@
+import socket
+import threading
+
+class Node:
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.connections = []
+
+        # Configurar socket como servidor y cliente
+        self.server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server_socket.bind((self.host, self.port))
+        self.server_socket.listen(5)
+
+    def start(self):
+        # Configurar hilo para aceptar conexiones entrantes
+        accept_thread = threading.Thread(target=self.accept_connections)
+        accept_thread.start()
+
+        # Conectar a otros nodos
+        self.connect_to_nodes()
+
+        # Enviar mensajes desde la consola
+        while True:
+            message = input("Mensaje: ")
+            self.send_to_all(message)
+
+    def accept_connections(self):
+        while True:
+            client, addr = self.server_socket.accept()
+            self.connections.append(client)
+
+            # Configurar hilo para manejar la conexión entrante
+            client_thread = threading.Thread(target=self.handle_client, args=(client,))
+            client_thread.start()
+
+    def connect_to_nodes(self):
+        # Configurar conexiones a otros nodos
+        for i in range(1, 4):  # Conectar a nodos en el rango del puerto 5556 al 5558
+            if i != self.port % 5555:
+                try:
+                    self.client_socket.connect((self.host, (self.port + i) % 5555))
+                    self.connections.append(self.client_socket)
+                    print(f"Conectado a nodo en el puerto {(self.port + i) % 5555}")
+                except Exception as e:
+                    print(f"No se pudo conectar al nodo en el puerto {(self.port + i) % 5555}: {str(e)}")
+
+    def handle_client(self, client):
+        while True:
+            try:
+                data = client.recv(1024)
+                if not data:
+                    break
+                print(f"Mensaje recibido: {data.decode('utf-8')}")
+            except Exception as e:
+                print(f"Error al recibir mensajes: {str(e)}")
+                break
+
+    def send_to_all(self, message):
+        for connection in self.connections:
+            try:
+                connection.send(message.encode('utf-8'))
+            except Exception as e:
+                print(f"Error al enviar mensaje: {str(e)}")
+
+# Configuración del nodo
+host = '127.0.0.1'
+port = 5555
+
+node = Node(host, port)
+node.start()

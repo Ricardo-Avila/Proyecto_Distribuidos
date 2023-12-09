@@ -71,5 +71,9 @@ puerto = 5555
 # Lista de direcciones IP de los nodos destino
 nodos_destino = ['dirección_IP_nodo1', 'dirección_IP_nodo2']
 
+# NODO 1 : 192.168.183.136
+# NODO 2 : 192.168.183.147
+# NODO 3 : 192.168.183.148
+
 nodo = Nodo(host, puerto)
 nodo.iniciar(nodos_destino)

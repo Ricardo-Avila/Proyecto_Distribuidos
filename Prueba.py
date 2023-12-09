@@ -13,13 +13,13 @@ class Nodo:
         self.servidor_socket.bind((self.host, self.puerto))
         self.servidor_socket.listen(5)
 
-    def iniciar(self):
+    def iniciar(self, nodos_destino):
         # Configurar hilo para aceptar conexiones entrantes
         hilo_aceptar = threading.Thread(target=self.aceptar_conexiones)
         hilo_aceptar.start()
 
         # Conectar a otros nodos
-        self.conectar_a_nodos()
+        self.conectar_a_nodos(nodos_destino)
 
         # Enviar mensajes desde la consola
         while True:
@@ -35,16 +35,16 @@ class Nodo:
             hilo_cliente = threading.Thread(target=self.manejar_cliente, args=(cliente,))
             hilo_cliente.start()
 
-    def conectar_a_nodos(self):
+    def conectar_a_nodos(self, nodos_destino):
         # Configurar conexiones a otros nodos
-        for i in range(1, 4):  # Conectar a nodos en el rango del puerto 5556 al 5558
+        for i, direccion_ip in enumerate(nodos_destino):
             if i != self.puerto % 5555:
                 try:
-                    self.cliente_socket.connect((self.host, (self.puerto + i) % 5555))
+                    self.cliente_socket.connect((direccion_ip, (self.puerto + i) % 5555))
                     self.conexiones.append(self.cliente_socket)
-                    print(f"Conectado a nodo en el puerto {(self.puerto + i) % 5555}")
+                    print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}")
                 except Exception as e:
-                    print(f"No se pudo conectar al nodo en el puerto {(self.puerto + i) % 5555}: {str(e)}")
+                    print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}: {str(e)}")
 
     def manejar_cliente(self, cliente):
         while True:
@@ -65,8 +65,11 @@ class Nodo:
                 print(f"Error al enviar mensaje: {str(e)}")
 
 # Configuración del nodo
-host = '127.0.0.1'
+host = 'dirección_IP_local'  # Reemplazar con la dirección IP de la máquina local
 puerto = 5555
 
+# Lista de direcciones IP de los nodos destino
+nodos_destino = ['dirección_IP_nodo1', 'dirección_IP_nodo2']
+
 nodo = Nodo(host, puerto)
-nodo.iniciar()
+nodo.iniciar(nodos_destino)

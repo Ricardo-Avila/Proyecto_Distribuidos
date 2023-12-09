@@ -148,11 +148,11 @@ class Nodo:
                         print(f"Error al conectar con el nodo {nodo.nombre}: {e}")
 
 # Configuración de los nodos
-nodo_maestro = Nodo("Maestro", "127.0.0.1", 5000, "maestro")
-sucursal_1 = Nodo("Sucursal1", "127.0.0.1", 5001, "sucursal")
-sucursal_2 = Nodo("Sucursal2", "127.0.0.1", 5002, "sucursal")
-cliente_1 = Nodo("Cliente1", "127.0.0.1", 5003, "cliente")
-cliente_2 = Nodo("Cliente2", "127.0.0.1", 5004, "cliente")
+nodo_maestro = Nodo("Maestro", "127.0.0.1", 5000)
+sucursal_1 = Nodo("Sucursal1", "127.0.0.1", 5001)
+sucursal_2 = Nodo("Sucursal2", "127.0.0.1", 5002)
+cliente_1 = Nodo("Cliente1", "127.0.0.1", 5003)
+cliente_2 = Nodo("Cliente2", "127.0.0.1", 5004)
 
 # Iniciar los servidores en hilos separados
 threading.Thread(target=nodo_maestro.iniciar_servidor).start()

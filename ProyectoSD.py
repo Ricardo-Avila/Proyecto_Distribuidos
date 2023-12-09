@@ -177,15 +177,17 @@ cliente_2.conectar_con_nodos([nodo_maestro, sucursal_1, sucursal_2, cliente_1])
 # nodo_maestro.consenso()
 # nodo_maestro.redistribuir_articulos()
 # nodo_maestro.eleccion()
-while True:
-    opcion = int(input("Seleccione un nodo para enviar un mensaje (1: Maestro, 2: Sucursal1, 3: Sucursal2, 0: Salir): "))
-    if opcion == 1:
-        nodo_maestro.enviar_mensaje("192.168.1.101", 5001, 'sucursal')
-    elif opcion == 2:
-        sucursal_1.enviar_mensaje("192.168.1.100", 5000, 'maestro')
-    elif opcion == 3:
-        sucursal_2.enviar_mensaje("192.168.1.100", 5000, 'maestro')
-    elif opcion == 0:
-        break
-    else:
-        print("Opción no válida. Intente nuevamente.")
+
+def main():
+    while True:
+        opcion = int(input("Seleccione un nodo para enviar un mensaje (1: Maestro, 2: Sucursal1, 3: Sucursal2, 0: Salir): "))
+        if opcion == 1:
+            nodo_maestro.enviar_mensaje("192.168.1.101", 5001, 'sucursal')
+        elif opcion == 2:
+            sucursal_1.enviar_mensaje("192.168.1.100", 5000, 'maestro')
+        elif opcion == 3:
+            sucursal_2.enviar_mensaje("192.168.1.100", 5000, 'maestro')
+        elif opcion == 0:
+            break
+        else:
+            print("Opción no válida. Intente nuevamente.")

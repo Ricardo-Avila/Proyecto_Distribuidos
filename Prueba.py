@@ -65,11 +65,11 @@ class Nodo:
                 print(f"Error al enviar mensaje: {str(e)}")
 
 # Configuración del nodo
-host = 'dirección_IP_local'  # Reemplazar con la dirección IP de la máquina local
+host = '192.168.183.'  # Reemplazar con la dirección IP de la máquina local
 puerto = 5555
 
 # Lista de direcciones IP de los nodos destino
-nodos_destino = ['dirección_IP_nodo1', 'dirección_IP_nodo2']
+nodos_destino = ['192.168.183.', '192.168.183.']
 
 # NODO 1 : 192.168.183.136
 # NODO 2 : 192.168.183.147

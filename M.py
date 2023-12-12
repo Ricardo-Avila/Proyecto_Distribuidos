@@ -49,39 +49,6 @@ def manejar_cliente(conn, addr):
         # Cerrar la conexión después de salir del bloque try
         conn.close()
 
-def iniciar_servidor():
-    global estado_conexion
-
-    # Código para el servidor
-    host = input("Ingresa la direccion IP del servidor: ")
-    port = 12345
-
-    # Crear un objeto socket
-    server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-    # Vincular el socket al host y puerto
-    server_socket.bind((host, port))
-
-    # Escuchar conexiones entrantes (máximo 2 conexiones concurrentes en este ejemplo)
-    server_socket.listen(2)
-
-    print(f'Esperando conexiones en {host}:{port}...')
-
-    while estado_conexion['conectado']:
-        try:
-            # Aceptar la conexión entrante
-            conn, addr = server_socket.accept()
-
-            # Iniciar un hilo para manejar la conexión del cliente
-            client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-            client_thread.start()
-
-        except Exception as e:
-            print(f"Error de conexión: {e}")
-
-    # Cerrar el socket principal antes de salir del bucle principal
-    server_socket.close()
-
 def conectar_al_servidor():
     while True:
         try:
@@ -130,15 +97,42 @@ def conectar_al_servidor():
 
         except Exception as e:
             print(f"Error de conexión: {e}")
-            
+
 # Solicitar al usuario que elija ser servidor, cliente o finalizar programa
 while True:
     opcion = input("¿Desea ser servidor (s), cliente (c) o finalizar programa (f)? ")
 
     if opcion.lower() == 's':
-        # Iniciar el servidor en un hilo
-        server_thread = threading.Thread(target=iniciar_servidor)
-        server_thread.start()
+        # Código para el servidor
+        host = input("Ingrese la direccion IP de su servidor: ")
+        port = 12345
+
+        # Crear un objeto socket
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Vincular el socket al host y puerto
+        server_socket.bind((host, port))
+
+        # Escuchar conexiones entrantes (máximo 2 conexiones concurrentes en este ejemplo)
+        server_socket.listen(2)
+
+        print(f'Esperando conexiones en {host}:{port}...')
+
+        while True:
+            try:
+                # Aceptar la conexión entrante
+                conn, addr = server_socket.accept()
+
+                # Iniciar un hilo para manejar la conexión del cliente
+                client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+                client_thread.start()
+
+            except Exception as e:
+                print(f"Error de conexión: {e}")
+
+            # Si no hay más clientes conectados, salir del bucle principal
+            if not estado_conexion['conectado']:
+                break
 
     elif opcion.lower() == 'c':
         # Código para el cliente
@@ -146,7 +140,6 @@ while True:
 
     elif opcion.lower() == 'f':
         # Finalizar el programa
-        estado_conexion['conectado'] = False
         break
 
     else:

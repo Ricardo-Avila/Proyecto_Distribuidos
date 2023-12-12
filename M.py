@@ -6,62 +6,36 @@ import threading
 host = '192.168.183.136'
 port = 12345
 
-# Diccionario para almacenar nombres de clientes
-nombres_clientes = {}
-contador_clientes = 1
-
 def manejar_cliente(conn, addr):
-    global contador_clientes
-
     try:
-        # Asignar un nombre al cliente
-        nombre_cliente = f"Cliente {contador_clientes:02d}"
-        contador_clientes += 1
-        nombres_clientes[conn] = nombre_cliente
-
         # Obtener la fecha y hora actual de la conexión
         connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'Conexión establecida desde {addr} para {nombre_cliente} a las {connection_datetime}')
+        print(f'Conexión establecida desde {addr} a las {connection_datetime}')
 
         while True:
             data = conn.recv(1024)
             if not data:
                 # Si el cliente se desconecta, mostrar el mensaje y la hora
                 disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f'{nombre_cliente} desconectado desde {addr} a las {disconnection_datetime}')
+                print(f'Cliente desconectado desde {addr} a las {disconnection_datetime}')
                 break
 
             # Mostrar el mensaje recibido
-            print(f'Datos recibidos de {nombre_cliente} ({addr}): {data.decode()}')
+            print(f'Datos recibidos de {addr}: {data.decode()}')
 
             # Obtener la fecha y hora actual
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Crear el mensaje de confirmación con la fecha y hora
-            confirmation_message = f"Mensaje de {nombre_cliente} ({addr}) recibido por el servidor el {current_datetime}."
+            confirmation_message = f"Mensaje recibido por el servidor desde {addr} el {current_datetime}."
             conn.sendall(confirmation_message.encode())
 
-        # Cerrar la conexión después de salir del bucle interno
-        conn.close()
-        del nombres_clientes[conn]
-
-        # Si todos los clientes se han desconectado, preguntar si desea reiniciar el servidor
-        if not nombres_clientes:
-            if not reiniciar_servidor():
-                break
-
     except Exception as e:
-        print(f"Error de conexión con {nombre_cliente} ({addr}): {e}")
-        del nombres_clientes[conn]
+        print(f"Error de conexión con {addr}: {e}")
 
-def reiniciar_servidor():
-    global nombres_clientes, contador_clientes
-    nombres_clientes = {}
-    contador_clientes = 1
-
-    # Preguntar al usuario si desea reiniciar el servidor
-    reiniciar = input("¿Desea reiniciar el servidor? (y/n): ")
-    return reiniciar.lower() == 'y'
+    finally:
+        # Cerrar la conexión después de salir del bloque try
+        conn.close()
 
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -69,27 +43,22 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 # Vincular el socket al host y puerto
 s.bind((host, port))
 
+# Escuchar conexiones entrantes (máximo 2 conexiones concurrentes en este ejemplo)
+s.listen(2)
+
+print(f'Esperando conexiones en {host}:{port}...')
+
 while True:
     try:
-        # Escuchar conexiones entrantes (máximo 5 conexiones en este ejemplo)
-        s.listen(5)
-        print(f'Esperando conexiones en {host}:{port}...')
+        # Aceptar la conexión entrante
+        conn, addr = s.accept()
 
-        while len(nombres_clientes) < 5:
-            # Aceptar la conexión entrante
-            conn, addr = s.accept()
-
-            # Iniciar un hilo para manejar el cliente
-            thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-            thread.start()
-
-        # Esperar a que todos los hilos terminen
-        for thread in threading.enumerate():
-            if thread != threading.current_thread():
-                thread.join()
+        # Iniciar un hilo para manejar la conexión del cliente
+        client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+        client_thread.start()
 
     except Exception as e:
-        print(f"Error de servidor: {e}")
+        print(f"Error de conexión: {e}")
 
-# Cerrar el socket principal después de salir del bucle principal
+# Cerrar el socket principal antes de salir del bucle principal
 s.close()

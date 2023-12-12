@@ -20,7 +20,7 @@ class Nodo:
         hilo_aceptar.start()
 
         # Conectar a otros nodos
-        self.conectar_a_nodos(nodos_destino,puertos_destino)
+        self.conectar_a_nodos(nodos_destino)
 
         # Enviar mensajes desde la consola
         while True:
@@ -40,19 +40,17 @@ class Nodo:
             print(f"Hilo iniciado.....")
             sys.stdout.flush()
 
-    def conectar_a_nodos(self, nodos_destino, puertos_destino):
-        min_length = min(len(nodos_destino), len(puertos_destino))
-        for i in range(min_length):
-            direccion_ip = nodos_destino[i]
-            puerto_destino = puertos_destino[i]
-            if puerto_destino != self.puerto:
+    def conectar_a_nodos(self, nodos_destino):
+        # Configurar conexiones a otros nodos
+        for i, direccion_ip in enumerate(nodos_destino):
+            if i != self.puerto % 5555:
                 try:
                     cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                    cliente_socket.connect((direccion_ip, puerto_destino))
+                    cliente_socket.connect((direccion_ip, (self.puerto + i) % 5555))
                     self.conexiones.append(cliente_socket)
-                    print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}")
+                    print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}")
                 except Exception as e:
-                    print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}: {str(e)}")
+                    print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}: {str(e)}")
 
     def manejar_cliente(self, cliente):
         while True:
@@ -80,7 +78,6 @@ def main():
     
     # Lista de direcciones IP de los nodos destino
     nodos_destino = ['192.168.183.', '192.168.183.']
-    puertos_destino = [5555, 5556, 5557]
     
     # NODO 1 : 192.168.183.136
     # NODO 2 : 192.168.183.147

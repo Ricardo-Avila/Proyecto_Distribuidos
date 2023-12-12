@@ -14,7 +14,7 @@ while True:
         s.bind((host, port))
 
         # Escuchar conexiones entrantes (máximo 1 conexión en este ejemplo)
-        s.listen(1)
+        s.listen(2)
 
         print(f'Esperando una conexión en {host}:{port}...')
 

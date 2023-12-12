@@ -41,15 +41,18 @@ class Nodo:
             sys.stdout.flush()
 
     def conectar_a_nodos(self, nodos_destino, puertos_destino):
-    for direccion_ip, puerto_destino in zip(nodos_destino, puertos_destino):
-        if puerto_destino != self.puerto:
-            try:
-                cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                cliente_socket.connect((direccion_ip, puerto_destino))
-                self.conexiones.append(cliente_socket)
-                print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}")
-            except Exception as e:
-                print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}: {str(e)}")
+        min_length = min(len(nodos_destino), len(puertos_destino))
+        for i in range(min_length):
+            direccion_ip = nodos_destino[i]
+            puerto_destino = puertos_destino[i]
+            if puerto_destino != self.puerto:
+                try:
+                    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    cliente_socket.connect((direccion_ip, puerto_destino))
+                    self.conexiones.append(cliente_socket)
+                    print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}")
+                except Exception as e:
+                    print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {puerto_destino}: {str(e)}")
 
     def manejar_cliente(self, cliente):
         while True:

@@ -51,6 +51,7 @@ def manejar_cliente(conn, addr):
         if clientes_conectados == 0:
             conectado = False
             print(f"Quedarse es: [{conectado}]")
+            conn.close()
 
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
@@ -143,7 +144,7 @@ while True:
             except Exception as e:
                 print(f"Error de conexión: {e}")
 
-            print(f"Quedarse es: [{conectado}]")
+            print(f"Voy a salir: [{conectado}]")
             # Si no hay más clientes conectados, salir del bucle principal
             if not conectado:
                 break

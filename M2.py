@@ -3,56 +3,72 @@ from datetime import datetime
 import threading
 import time
 
-def conectar_al_servidor():
-    while True:
-        try:
-            # Dirección IP y puerto del servidor al que se conectará el cliente
-            host = '192.168.183.136'
-            port = 12345
+def enviar_al_servidor():
+    try:
+        # Dirección IP y puerto del servidor al que se conectará el cliente
+        host = '192.168.183.136'
+        port = 12345
 
-            # Crear un objeto socket
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Crear un objeto socket para enviar mensajes al servidor
+        s_enviar = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s_enviar.connect((host, port))
 
-            # Conectar al servidor
-            s.connect((host, port))
-            
-            # Obtener la fecha y hora actual de la conexión
-            connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'Conectado al servidor en {host}:{port} a las {connection_datetime}')
+        while True:
+            # Solicitar al usuario que ingrese un mensaje personalizado
+            user_input = input("Ingrese su mensaje para el servidor (o escriba 'quit' para cerrar el programa): ")
 
-            while True:
-                # Solicitar al usuario que ingrese un mensaje personalizado
-                user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
+            if user_input.lower() == 'quit':
+                break
 
-                if user_input.lower() == 'quit':
-                    return  # Terminar el hilo y cerrar el programa
+            # Obtener la hora actual
+            current_time = datetime.now().strftime("%H:%M:%S")
 
-                # Obtener la hora actual
-                current_time = datetime.now().strftime("%H:%M:%S")
+            # Crear el mensaje con la hora
+            full_message = f"[{current_time}] {user_input}"
 
-                # Crear el mensaje con la hora
-                full_message = f"[{current_time}] {user_input}"
+            # Enviar el mensaje al servidor
+            s_enviar.sendall(full_message.encode())
+            print(f'Mensaje enviado al servidor: {full_message}')
 
-                # Enviar el mensaje al servidor
-                s.sendall(full_message.encode())
-                print(f'Mensaje enviado: {full_message}')
+        # Cerrar la conexión para enviar mensajes al servidor
+        s_enviar.close()
 
-                # Recibir la confirmación del servidor
-                confirmation = s.recv(1024)
-                print(f'Confirmación del servidor: {confirmation.decode()}')
+    except Exception as e:
+        print(f"Error de conexión al enviar mensajes al servidor: {e}")
 
-            # Cerrar la conexión
-            s.close()
+def recibir_del_servidor():
+    try:
+        # Dirección IP y puerto del servidor al que se conectará el cliente
+        host = '192.168.183.136'
+        port = 12346  # Puerto diferente para la conexión de recepción del servidor
 
-        except Exception as e:
-            print(f"Error de conexión: {e}")
+        # Crear un objeto socket para recibir mensajes del servidor
+        s_recibir = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s_recibir.connect((host, port))
 
-        # Esperar antes de intentar nuevamente (por ejemplo, 5 segundos)
-        time.sleep(5)
+        while True:
+            # Recibir mensajes del servidor
+            data = s_recibir.recv(1024)
+            if not data:
+                break
 
-# Iniciar un hilo para manejar la conexión al servidor
-thread = threading.Thread(target=conectar_al_servidor)
-thread.start()
+            # Mostrar el mensaje recibido del servidor
+            print(f'Mensaje recibido del servidor: {data.decode()}')
 
-# Esperar a que el hilo termine (puedes implementar una lógica diferente para manejar esto)
-thread.join()
+        # Cerrar la conexión para recibir mensajes del servidor
+        s_recibir.close()
+
+    except Exception as e:
+        print(f"Error de conexión al recibir mensajes del servidor: {e}")
+
+# Iniciar dos hilos para manejar cada conexión por separado
+thread_enviar = threading.Thread(target=enviar_al_servidor)
+thread_recibir = threading.Thread(target=recibir_del_servidor)
+
+# Iniciar los hilos
+thread_enviar.start()
+thread_recibir.start()
+
+# Esperar a que ambos hilos terminen (puedes implementar una lógica diferente para manejar esto)
+thread_enviar.join()
+thread_recibir.join()

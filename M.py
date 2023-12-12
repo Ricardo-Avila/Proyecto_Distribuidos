@@ -39,9 +39,6 @@ def manejar_cliente(conn, addr):
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
 
-    finally:
-        # Cerrar la conexión después de salir del bloque try
-        
 
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

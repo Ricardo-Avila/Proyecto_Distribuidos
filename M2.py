@@ -18,6 +18,10 @@ def enviar_mensajes():
         # Enviar el mensaje al servidor
         s.sendall(full_message.encode())
         print(f'Mensaje enviado: {full_message}')
+        
+        # Recibir la confirmación del servidor
+        confirmation = s.recv(1024)
+        print(f'Confirmación del servidor: {confirmation.decode()}')
 
 # Dirección IP y puerto del servidor al que se conectará el cliente
 host = '192.168.183.136'

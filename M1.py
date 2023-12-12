@@ -16,28 +16,37 @@ s.listen(1)
 
 print(f'Esperando una conexión en {host}:{port}...')
 
-# Aceptar la conexión entrante
-conn, addr = s.accept()
+try:
+    # Aceptar la conexión entrante
+    conn, addr = s.accept()
 
-# Obtener la fecha y hora actual de la conexión
-connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-print(f'Conexión establecida desde {addr} a las {connection_datetime}')
+    # Obtener la fecha y hora actual de la conexión
+    connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    print(f'Conexión establecida desde {addr} a las {connection_datetime}')
 
-# Recibir y mostrar datos del cliente
-while True:
-    data = conn.recv(1024)
-    if not data:
-        break
-    
-    # Mostrar el mensaje recibido
-    print(f'Datos recibidos del cliente: {data.decode()}')
-    
-    # Obtener la fecha y hora actual
-    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    
-    # Crear el mensaje de confirmación con la fecha y hora
-    confirmation_message = f"Mensaje recibido por el servidor el {current_datetime}."
-    conn.sendall(confirmation_message.encode())
+    # Recibir y mostrar datos del cliente
+    while True:
+        data = conn.recv(1024)
+        if not data:
+            # Si el cliente se desconecta, mostrar el mensaje y la hora
+            disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f'Cliente desconectado a las {disconnection_datetime}')
+            break
 
-# Cerrar la conexión después de salir del bucle
-conn.close()
+        # Mostrar el mensaje recibido
+        print(f'Datos recibidos del cliente: {data.decode()}')
+
+        # Obtener la fecha y hora actual
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        # Crear el mensaje de confirmación con la fecha y hora
+        confirmation_message = f"Mensaje recibido por el servidor el {current_datetime}."
+        conn.sendall(confirmation_message.encode())
+
+except Exception as e:
+    print(f"Error: {e}")
+
+finally:
+    # Cerrar la conexión después de salir del bloque try
+    if 'conn' in locals():
+        conn.close()

@@ -19,9 +19,12 @@ print(f'Esperando una conexión en {host}:{port}...')
 conn, addr = s.accept()
 print(f'Conexión establecida desde {addr}')
 
-# Recibir datos del cliente
-data = conn.recv(1024)
-print(f'Datos recibidos: {data.decode()}')
+# Recibir y mostrar datos del cliente
+while True:
+    data = conn.recv(1024)
+    if not data:
+        break
+    print(f'Datos recibidos del cliente: {data.decode()}')
 
 # Cerrar la conexión
 conn.close()

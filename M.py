@@ -48,10 +48,7 @@ s.listen(2)
 
 print(f'Esperando conexiones en {host}:{port}...')
 
-# Bandera para verificar si hay clientes conectados
-clientes_conectados = True
-
-while clientes_conectados:
+while True:
     try:
         # Aceptar la conexión entrante
         conn, addr = s.accept()
@@ -63,19 +60,5 @@ while clientes_conectados:
     except Exception as e:
         print(f"Error de conexión: {e}")
 
-    finally:
-        # Esperar a que todos los hilos terminen antes de preguntar al usuario
-        client_thread.join()
-
-        # Verificar si hay clientes conectados
-        clientes_conectados = any(thread.is_alive() for thread in threading.enumerate())
-
-# Preguntar si se desea reiniciar o terminar el programa
-user_input = input("Todos los clientes se han desconectado. ¿Desea reiniciar el servidor? (y/n): ")
-if user_input.lower() == 'y':
-    clientes_conectados = True
-else:
-    clientes_conectados = False
-
-# Cerrar el socket principal
+# Cerrar el socket principal antes de salir del bucle principal
 s.close()

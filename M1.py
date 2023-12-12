@@ -40,11 +40,6 @@ while True:
             confirmation_message = f"Mensaje de Máquina2 recibido por el servidor el {current_datetime}."
             conn.sendall(confirmation_message.encode())
 
-            # Preguntar al usuario si desea continuar esperando o cerrar el programa
-            user_input = input("¿Desea seguir esperando conexiones? (y/n): ")
-            if user_input.lower() != 'y':
-                break
-
         # Cerrar la conexión después de salir del bucle interno
         conn.close()
 

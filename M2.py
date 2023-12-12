@@ -15,7 +15,10 @@ def conectar_al_servidor():
 
             # Conectar al servidor
             s.connect((host, port))
-            print(f'Conectado al servidor en {host}:{port}')
+            
+            # Obtener la fecha y hora actual de la conexión
+            connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f'Conectado al servidor en {host}:{port} a las {connection_datetime}')
 
             while True:
                 # Solicitar al usuario que ingrese un mensaje personalizado

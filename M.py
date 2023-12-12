@@ -1,25 +1,17 @@
 import socket
 from datetime import datetime
 import threading
-import time
 
-# Variable booleana para rastrear el estado de conexión
-conectado = False
-
-# Contador de clientes conectados
-clientes_conectados = 0
+# Objeto compartido para rastrear el estado de conexión y el número de clientes conectados
+estado_conexion = {'conectado': False, 'clientes_conectados': 0}
 
 def manejar_cliente(conn, addr):
-    global conectado
-    global clientes_conectados
-
     try:
         # Incrementar el contador de clientes conectados
-        clientes_conectados += 1
-        print(f"Existen [{clientes_conectados}] clientes conectados")
+        estado_conexion['clientes_conectados'] += 1
 
         # Establecer la variable conectado en True
-        conectado = True
+        estado_conexion['conectado'] = True
 
         # Obtener la fecha y hora actual de la conexión
         connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -44,14 +36,11 @@ def manejar_cliente(conn, addr):
             conn.sendall(confirmation_message.encode())
 
         # Decrementar el contador de clientes conectados
-        clientes_conectados -= 1
-        print(f"Existen [{clientes_conectados}] clientes conectados")
+        estado_conexion['clientes_conectados'] -= 1
 
         # Si no hay más clientes conectados, establecer conectado en False
-        if clientes_conectados == 0:
-            conectado = False
-            print(f"Quedarse es: [{conectado}]")
-            conn.close()
+        if estado_conexion['clientes_conectados'] == 0:
+            estado_conexion['conectado'] = False
 
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
@@ -109,9 +98,6 @@ def conectar_al_servidor():
         except Exception as e:
             print(f"Error de conexión: {e}")
 
-        # Esperar antes de intentar nuevamente (por ejemplo, 5 segundos)
-        time.sleep(5)
-
 # Solicitar al usuario que elija ser servidor, cliente o finalizar programa
 while True:
     opcion = input("¿Desea ser servidor (s), cliente (c) o finalizar programa (f)? ")
@@ -144,9 +130,9 @@ while True:
             except Exception as e:
                 print(f"Error de conexión: {e}")
 
-            print(f"Voy a salir: [{conectado}]")
             # Si no hay más clientes conectados, salir del bucle principal
-            if not conectado:
+            if not estado_conexion['conectado']:
+                print("Entro al Break")
                 break
 
     elif opcion.lower() == 'c':

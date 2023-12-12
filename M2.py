@@ -12,18 +12,27 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
 print(f'Conectado al servidor en {host}:{port}')
 
-# Enviar una serie de mensajes al servidor
-messages = ["Hola, servidor!", "¿Cómo estás?", "Este es otro mensaje."]
-for message in messages:
+# Solicitar al usuario que ingrese mensajes personalizados
+messages = []
+while True:
+    user_input = input("Ingrese su mensaje (o escriba 'exit' para salir): ")
+    
+    if user_input.lower() == 'exit':
+        break
+    
     # Obtener la hora actual
     current_time = datetime.now().strftime("%H:%M:%S")
     
     # Crear el mensaje con la hora
-    full_message = f"[{current_time}] {message}"
+    full_message = f"[{current_time}] {user_input}"
     
-    # Enviar el mensaje al servidor
-    s.sendall(full_message.encode())
-    print(f'Mensaje enviado: {full_message}')
+    # Agregar el mensaje a la lista
+    messages.append(full_message)
+
+# Enviar la serie de mensajes al servidor
+for message in messages:
+    s.sendall(message.encode())
+    print(f'Mensaje enviado: {message}')
 
 # Cerrar la conexión
 s.close()

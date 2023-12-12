@@ -12,6 +12,7 @@ class Nodo:
         self.cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.servidor_socket.bind((self.host, self.puerto))
         self.servidor_socket.listen(5)
+        print(f"Nodo creado exitosamente.....")
 
     def iniciar(self, nodos_destino):
         # Configurar hilo para aceptar conexiones entrantes
@@ -30,18 +31,21 @@ class Nodo:
         while True:
             cliente, addr = self.servidor_socket.accept()
             self.conexiones.append(cliente)
+            print(f"Socket aceptado.......")
 
             # Configurar hilo para manejar la conexión entrante
             hilo_cliente = threading.Thread(target=self.manejar_cliente, args=(cliente,))
             hilo_cliente.start()
+            print(f"Hilo iniciado.....")
 
     def conectar_a_nodos(self, nodos_destino):
         # Configurar conexiones a otros nodos
         for i, direccion_ip in enumerate(nodos_destino):
             if i != self.puerto % 5555:
                 try:
-                    self.cliente_socket.connect((direccion_ip, (self.puerto + i) % 5555))
-                    self.conexiones.append(self.cliente_socket)
+                    cliente_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                    cliente_socket.connect((direccion_ip, (self.puerto + i) % 5555))
+                    self.conexiones.append(cliente_socket)
                     print(f"Conectado a nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}")
                 except Exception as e:
                     print(f"No se pudo conectar al nodo en la dirección IP {direccion_ip}, puerto {(self.puerto + i) % 5555}: {str(e)}")

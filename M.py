@@ -3,8 +3,23 @@ from datetime import datetime
 import threading
 import time
 
+# Variable booleana para rastrear el estado de conexión
+conectado = False
+
+# Contador de clientes conectados
+clientes_conectados = 0
+
 def manejar_cliente(conn, addr):
+    global conectado
+    global clientes_conectados
+
     try:
+        # Incrementar el contador de clientes conectados
+        clientes_conectados += 1
+
+        # Establecer la variable conectado en True
+        conectado = True
+
         # Obtener la fecha y hora actual de la conexión
         connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f'Conexión establecida desde {addr} a las {connection_datetime}')
@@ -26,6 +41,13 @@ def manejar_cliente(conn, addr):
             # Crear el mensaje de confirmación con la fecha y hora
             confirmation_message = f"Mensaje recibido por el servidor desde {addr} el {current_datetime}."
             conn.sendall(confirmation_message.encode())
+
+        # Decrementar el contador de clientes conectados
+        clientes_conectados -= 1
+
+        # Si no hay más clientes conectados, establecer conectado en False
+        if clientes_conectados == 0:
+            conectado = False
 
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
@@ -117,6 +139,10 @@ while True:
 
             except Exception as e:
                 print(f"Error de conexión: {e}")
+
+            # Si no hay más clientes conectados, salir del bucle principal
+            if not conectado:
+                break
 
     elif opcion.lower() == 'c':
         # Código para el cliente

@@ -29,17 +29,12 @@ def manejar_cliente(conn, addr):
             # Crear el mensaje de confirmación con la fecha y hora
             confirmation_message = f"Mensaje recibido por el servidor desde {addr} el {current_datetime}."
             conn.sendall(confirmation_message.encode())
-
-        conn.close()
-
-        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-        if user_input.lower() != 'y':
-            break  # Terminar el programa
             
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
 
-
+    finally:
+         conn.close()
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -60,6 +55,10 @@ while True:
         client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
         client_thread.start()
 
+        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+        if user_input.lower() != 'y':
+            break  # Terminar el programa
+            
     except Exception as e:
         print(f"Error de conexión: {e}")
 

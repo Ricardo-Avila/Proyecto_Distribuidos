@@ -1,77 +1,70 @@
 import socket
-import threading
 from datetime import datetime
+import threading
 
-def manejar_conexion_entrante(socket_entrada, nombre):
-    while True:
-        data = socket_entrada.recv(1024)
-        if not data:
-            disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'{nombre} desconectada a las {disconnection_datetime}')
-            break
+# Dirección IP y puerto en el que el servidor escuchará
+host = '192.168.183.136'
+port = 12345
 
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'Datos recibidos de {nombre}: {data.decode()} a las {current_datetime}')
+# Lista para almacenar conexiones activas
+conexiones = []
 
-def conectar_a_otra_maquina(ip, port, nombre):
+def manejar_cliente(conn, addr):
     try:
-        # Crear un socket para enviar mensajes
-        socket_envio = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_envio.connect((ip, port))
-
-        # Crear un socket para recibir mensajes
-        socket_entrada = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        socket_entrada.bind(('0.0.0.0', 0))
-        socket_entrada.listen(1)
-
-        # Enviar al otro extremo la información para conectarse
-        local_ip, local_port = socket_entrada.getsockname()
-        socket_envio.sendall(f"{local_ip},{local_port}".encode())
-
-        # Aceptar la conexión entrante del otro extremo
-        conn_entrada, addr_entrada = socket_entrada.accept()
-
-        print(f'Conexión establecida con {nombre}')
-
-        # Iniciar hilos para manejar la comunicación en ambas direcciones
-        hilo_entrada = threading.Thread(target=manejar_conexion_entrante, args=(conn_entrada, nombre))
-        hilo_entrada.start()
+        # Obtener la fecha y hora actual de la conexión
+        connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f'Conexión establecida desde {addr} a las {connection_datetime}')
 
         while True:
-            # Solicitar al usuario que ingrese un mensaje personalizado
-            user_input = input(f'[{nombre}] Ingrese su mensaje (o escriba "quit" para cerrar el programa): ')
-
-            if user_input.lower() == 'quit':
+            data = conn.recv(1024)
+            if not data:
+                # Si la máquina2 se desconecta, mostrar el mensaje y la hora
+                disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                print(f'Máquina2 desconectada desde {addr} a las {disconnection_datetime}')
                 break
 
-            # Obtener la hora actual
-            current_time = datetime.now().strftime("%H:%M:%S")
+            # Mostrar el mensaje recibido
+            print(f'Datos recibidos de Máquina2 ({addr}): {data.decode()}')
 
-            # Crear el mensaje con la hora
-            full_message = f"[{current_time}] {user_input}"
+            # Obtener la fecha y hora actual
+            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-            # Enviar el mensaje al otro extremo
-            socket_envio.sendall(full_message.encode())
-            print(f'Mensaje enviado: {full_message}')
+            # Crear el mensaje de confirmación con la fecha y hora
+            confirmation_message = f"Mensaje de Máquina2 ({addr}) recibido por el servidor el {current_datetime}."
+            conn.sendall(confirmation_message.encode())
 
-        # Cerrar las conexiones al salir del bucle
-        socket_envio.close()
-        conn_entrada.close()
+        # Cerrar la conexión después de salir del bucle interno
+        conn.close()
+        conexiones.remove(conn)
 
     except Exception as e:
-        print(f"Error de conexión: {e}")
+        print(f"Error de conexión con Máquina2 ({addr}): {e}")
+        conexiones.remove(conn)
 
-# Obtener la dirección IP local de la máquina actual
-local_ip = socket.gethostbyname(socket.gethostname())
-print(f'Dirección IP local de esta máquina: {local_ip}')
+# Crear un objeto socket
+s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Configuración de la conexión a la otra máquina
-ip_otra_maquina = input('Ingrese la dirección IP de la otra máquina: ')
-port_otra_maquina = int(input('Ingrese el puerto para la conexión: '))
+# Vincular el socket al host y puerto
+s.bind((host, port))
 
-# Iniciar el hilo para conectar a la otra máquina
-hilo_conexion = threading.Thread(target=conectar_a_otra_maquina, args=(ip_otra_maquina, port_otra_maquina, 'Máquina2'))
-hilo_conexion.start()
+# Escuchar conexiones entrantes (máximo 5 conexiones en este ejemplo)
+s.listen(5)
 
-# Esperar a que el hilo termine (puedes implementar una lógica diferente para manejar esto)
-hilo_conexion.join()
+print(f'Esperando conexiones en {host}:{port}...')
+
+while len(conexiones) < 5:
+    # Aceptar la conexión entrante
+    conn, addr = s.accept()
+    conexiones.append(conn)
+
+    # Iniciar un hilo para manejar el cliente
+    thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+    thread.start()
+
+# Esperar a que todos los hilos terminen
+for thread in threading.enumerate():
+    if thread != threading.current_thread():
+        thread.join()
+
+# Cerrar el socket principal después de salir del bucle principal
+s.close()

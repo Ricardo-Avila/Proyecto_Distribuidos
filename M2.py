@@ -6,26 +6,31 @@ import time
 def conectar_al_servidor():
     while True:
         try:
-            # Dirección IP y puerto del servidor al que se conectará el cliente
-            host = '192.168.183.136'
-            port = 12345
+            # Solicitar al usuario que ingrese la dirección IP del servidor
+            server_ip = input("Ingrese la dirección IP del servidor (o escriba 'quit' para cerrar el programa): ")
+            
+            if server_ip.lower() == 'quit':
+                return  # Terminar el hilo y cerrar el programa
+
+            # Solicitar al usuario que ingrese el puerto del servidor
+            server_port = input("Ingrese el puerto del servidor: ")
 
             # Crear un objeto socket
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
             # Conectar al servidor
-            s.connect((host, port))
-            
+            s.connect((server_ip, int(server_port)))
+
             # Obtener la fecha y hora actual de la conexión
             connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'Conectado al servidor en {host}:{port} a las {connection_datetime}')
+            print(f'Conectado al servidor en {server_ip}:{server_port} a las {connection_datetime}')
 
             while True:
                 # Solicitar al usuario que ingrese un mensaje personalizado
                 user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
 
                 if user_input.lower() == 'quit':
-                    return  # Terminar el hilo y cerrar el programa
+                    break
 
                 # Obtener la hora actual
                 current_time = datetime.now().strftime("%H:%M:%S")

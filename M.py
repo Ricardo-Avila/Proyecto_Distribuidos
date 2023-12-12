@@ -16,6 +16,7 @@ def manejar_cliente(conn, addr):
     try:
         # Incrementar el contador de clientes conectados
         clientes_conectados += 1
+        print(f"Existen [{clientes_conectados}] clientes conectados")
 
         # Establecer la variable conectado en True
         conectado = True
@@ -44,10 +45,12 @@ def manejar_cliente(conn, addr):
 
         # Decrementar el contador de clientes conectados
         clientes_conectados -= 1
+        print(f"Existen [{clientes_conectados}] clientes conectados")
 
         # Si no hay más clientes conectados, establecer conectado en False
         if clientes_conectados == 0:
             conectado = False
+            print(f"Quedarse es: [{conectado}]")
 
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
@@ -140,6 +143,7 @@ while True:
             except Exception as e:
                 print(f"Error de conexión: {e}")
 
+            print(f"Quedarse es: [{conectado}]")
             # Si no hay más clientes conectados, salir del bucle principal
             if not conectado:
                 break

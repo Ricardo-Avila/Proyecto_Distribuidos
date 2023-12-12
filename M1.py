@@ -20,7 +20,10 @@ while True:
 
         # Aceptar la conexión entrante
         conn, addr = s.accept()
-        print(f'Conexión establecida desde {addr}')
+
+        # Obtener la fecha y hora actual de la conexión
+        connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f'Conexión establecida desde {addr} a las {connection_datetime}')
 
         while True:
             data = conn.recv(1024)

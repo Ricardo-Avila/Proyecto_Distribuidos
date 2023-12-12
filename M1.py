@@ -24,7 +24,10 @@ while True:
     data = conn.recv(1024)
     if not data:
         break
+    
+    # Mostrar el mensaje recibido
     print(f'Datos recibidos del cliente: {data.decode()}')
-
-# Cerrar la conexión
-conn.close()
+    
+    # Enviar una confirmación al cliente
+    confirmation_message = "Mensaje recibido por el servidor."
+    conn.sendall(confir

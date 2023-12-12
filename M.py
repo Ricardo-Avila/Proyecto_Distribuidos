@@ -29,12 +29,14 @@ def manejar_cliente(conn, addr):
             # Crear el mensaje de confirmación con la fecha y hora
             confirmation_message = f"Mensaje recibido por el servidor desde {addr} el {current_datetime}."
             conn.sendall(confirmation_message.encode())
-            
+
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")
 
     finally:
-         conn.close()
+        # Cerrar la conexión después de salir del bloque try
+        conn.close()
+
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -45,22 +47,37 @@ s.bind((host, port))
 s.listen(2)
 
 print(f'Esperando conexiones en {host}:{port}...')
-while True:
-    while True:
-        try:
-            # Aceptar la conexión entrante
-            conn, addr = s.accept()
-    
-            # Iniciar un hilo para manejar la conexión del cliente
-            client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-            client_thread.start()
-      
-        except Exception as e:
-            print(f"Error de conexión: {e}")
-            
-    user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-    if user_input.lower() != 'y':
-        break  # Terminar el programa
 
-# Cerrar el socket principal antes de salir del bucle principal
+# Lista para almacenar los hilos de manejo de clientes
+threads = []
+
+while True:
+    try:
+        # Aceptar la conexión entrante
+        conn, addr = s.accept()
+
+        # Iniciar un hilo para manejar la conexión del cliente
+        client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+        client_thread.start()
+
+        # Agregar el hilo a la lista
+        threads.append(client_thread)
+
+        # Eliminar hilos terminados
+        threads = [thread for thread in threads if thread.is_alive()]
+
+        # Si no hay más hilos activos, preguntar si se desea reiniciar o terminar el programa
+        if not threads:
+            user_input = input("Todos los clientes se han desconectado. ¿Desea reiniciar el servidor? (y/n): ")
+            if user_input.lower() != 'y':
+                break  # Terminar el programa
+
+    except Exception as e:
+        print(f"Error de conexión: {e}")
+
+# Esperar a que todos los hilos terminen antes de cerrar el socket principal
+for thread in threads:
+    thread.join()
+
+# Cerrar el socket principal
 s.close()

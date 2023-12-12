@@ -20,7 +20,7 @@ class Nodo:
         hilo_aceptar.start()
 
         # Conectar a otros nodos
-        self.conectar_a_nodos(nodos_destino)
+        self.conectar_a_nodos(nodos_destino,puertos_destino)
 
         # Enviar mensajes desde la consola
         while True:

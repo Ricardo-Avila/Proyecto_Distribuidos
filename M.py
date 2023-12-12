@@ -3,7 +3,7 @@ from datetime import datetime
 import threading
 
 # Dirección IP y puerto en el que el servidor escuchará
-host = '192.168.183.136'
+host = input("Ingrese la dirección IP del servidor: ")
 port = 12345
 
 def manejar_cliente(conn, addr):

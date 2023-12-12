@@ -48,10 +48,10 @@ s.listen(2)
 
 print(f'Esperando conexiones en {host}:{port}...')
 
-# Lista para almacenar los hilos de manejo de clientes
-threads = []
+# Bandera para verificar si hay clientes conectados
+clientes_conectados = True
 
-while True:
+while clientes_conectados:
     try:
         # Aceptar la conexión entrante
         conn, addr = s.accept()
@@ -60,25 +60,22 @@ while True:
         client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
         client_thread.start()
 
-        # Agregar el hilo a la lista
-        threads.append(client_thread)
-
     except Exception as e:
         print(f"Error de conexión: {e}")
 
     finally:
-        # Eliminar hilos terminados de la lista
-        threads = [thread for thread in threads if thread.is_alive()]
+        # Esperar a que todos los hilos terminen antes de preguntar al usuario
+        client_thread.join()
 
-        # Si no hay más hilos activos, preguntar si se desea reiniciar o terminar el programa
-        if not threads:
-            user_input = input("Todos los clientes se han desconectado. ¿Desea reiniciar el servidor? (y/n): ")
-            if user_input.lower() != 'y':
-                break  # Terminar el programa
+        # Verificar si hay clientes conectados
+        clientes_conectados = any(thread.is_alive() for thread in threading.enumerate())
 
-# Esperar a que todos los hilos terminen antes de cerrar el socket principal
-for thread in threads:
-    thread.join()
+# Preguntar si se desea reiniciar o terminar el programa
+user_input = input("Todos los clientes se han desconectado. ¿Desea reiniciar el servidor? (y/n): ")
+if user_input.lower() == 'y':
+    clientes_conectados = True
+else:
+    clientes_conectados = False
 
 # Cerrar el socket principal
 s.close()

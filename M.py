@@ -30,11 +30,11 @@ def manejar_cliente(conn, addr):
             confirmation_message = f"Mensaje recibido por el servidor desde {addr} el {current_datetime}."
             conn.sendall(confirmation_message.encode())
 
-            conn.close()
+        conn.close()
 
-            user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-            if user_input.lower() != 'y':
-                break  # Terminar el programa
+        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+        if user_input.lower() != 'y':
+            break  # Terminar el programa
             
     except Exception as e:
         print(f"Error de conexión con {addr}: {e}")

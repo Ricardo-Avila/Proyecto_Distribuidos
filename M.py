@@ -66,7 +66,7 @@ def conectar_al_servidor():
                 return  # Terminar el hilo y cerrar el programa
 
             # Solicitar al usuario que ingrese el puerto del servidor
-            server_port = input("Ingrese el puerto del servidor: ")
+            server_port = 12345
 
             # Crear un objeto socket
             s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -114,7 +114,7 @@ while True:
 
     if opcion.lower() == 's':
         # Código para el servidor
-        host = '0.0.0.0'
+        host = input("Ingresa la direccion IP del servidor: ")
         port = 12345
 
         # Crear un objeto socket

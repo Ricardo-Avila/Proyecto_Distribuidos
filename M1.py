@@ -43,7 +43,7 @@ def manejar_cliente(cliente, addr):
         if not clientes:
             reiniciar_servidor = input("¿Desea reiniciar el servidor? (y/n): ")
             if reiniciar_servidor.lower() != 'y':
-                return  # Terminar el programa
+                break  # Terminar el bucle principal de manejar_cliente
 
     except Exception as e:
         print(f"Error de conexión con Cliente ({addr}): {e}")

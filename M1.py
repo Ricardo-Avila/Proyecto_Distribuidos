@@ -30,4 +30,7 @@ while True:
     
     # Enviar una confirmación al cliente
     confirmation_message = "Mensaje recibido por el servidor."
-    conn.sendall(confir
+    conn.sendall(confirmation_message.encode())
+
+# Cerrar la conexión después de salir del bucle
+conn.close()

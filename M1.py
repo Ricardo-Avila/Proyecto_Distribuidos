@@ -1,4 +1,5 @@
 import socket
+from datetime import datetime
 
 # Dirección IP y puerto en el que el servidor escuchará
 host = '192.168.183.136'
@@ -28,8 +29,11 @@ while True:
     # Mostrar el mensaje recibido
     print(f'Datos recibidos del cliente: {data.decode()}')
     
-    # Enviar una confirmación al cliente
-    confirmation_message = "Mensaje recibido por el servidor."
+    # Obtener la hora actual
+    current_time = datetime.now().strftime("%H:%M:%S")
+    
+    # Crear el mensaje de confirmación con la hora
+    confirmation_message = f"Mensaje recibido por el servidor a las {current_time}."
     conn.sendall(confirmation_message.encode())
 
 # Cerrar la conexión después de salir del bucle

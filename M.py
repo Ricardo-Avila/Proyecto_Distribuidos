@@ -45,23 +45,22 @@ s.bind((host, port))
 s.listen(2)
 
 print(f'Esperando conexiones en {host}:{port}...')
-
 while True:
-    try:
-        # Aceptar la conexión entrante
-        conn, addr = s.accept()
-
-        # Iniciar un hilo para manejar la conexión del cliente
-        client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-        client_thread.start()
-  
-    except Exception as e:
-        print(f"Error de conexión: {e}")
-        
-    finally:
-        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-        if user_input.lower() != 'y':
-            break  # Terminar el programa
+    while True:
+        try:
+            # Aceptar la conexión entrante
+            conn, addr = s.accept()
+    
+            # Iniciar un hilo para manejar la conexión del cliente
+            client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+            client_thread.start()
+      
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+            
+    user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+    if user_input.lower() != 'y':
+        break  # Terminar el programa
 
 # Cerrar el socket principal antes de salir del bucle principal
 s.close()

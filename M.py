@@ -37,6 +37,10 @@ def manejar_cliente(conn, addr):
         # Cerrar la conexión después de salir del bloque try
         conn.close()
 
+        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+        if user_input.lower() != 'y':
+            break  # Terminar el programa
+
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -56,10 +60,6 @@ while True:
         # Iniciar un hilo para manejar la conexión del cliente
         client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
         client_thread.start()
-
-        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-        if user_input.lower() != 'y':
-            break  # Terminar el programa
 
     except Exception as e:
         print(f"Error de conexión: {e}")

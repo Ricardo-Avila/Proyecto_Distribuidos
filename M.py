@@ -57,6 +57,10 @@ while True:
         client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
         client_thread.start()
 
+        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+        if user_input.lower() != 'y':
+            break  # Terminar el programa
+
     except Exception as e:
         print(f"Error de conexión: {e}")
 

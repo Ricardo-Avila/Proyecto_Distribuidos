@@ -40,10 +40,21 @@ while True:
             confirmation_message = f"Mensaje de Máquina2 recibido por el servidor el {current_datetime}."
             conn.sendall(confirmation_message.encode())
 
+            # Preguntar al usuario si desea continuar esperando o cerrar el programa
+            user_input = input("¿Desea seguir esperando conexiones? (y/n): ")
+            if user_input.lower() != 'y':
+                break
+
+        # Cerrar la conexión después de salir del bucle interno
+        conn.close()
+
+        # Preguntar al usuario si desea reiniciar el servidor o cerrar el programa
+        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+        if user_input.lower() != 'y':
+            break  # Terminar el programa
+
     except Exception as e:
         print(f"Error de conexión: {e}")
 
-    finally:
-        # Cerrar la conexión después de salir del bloque try
-        if 'conn' in locals():
-            conn.close()
+# Cerrar el socket principal antes de salir del bucle principal
+s.close()

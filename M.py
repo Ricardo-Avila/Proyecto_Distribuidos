@@ -108,13 +108,13 @@ def conectar_al_servidor():
         # Esperar antes de intentar nuevamente (por ejemplo, 5 segundos)
         time.sleep(5)
 
-# Solicitar al usuario que elija ser servidor o cliente
+# Solicitar al usuario que elija ser servidor, cliente o finalizar programa
 while True:
-    opcion = input("¿Desea ser servidor (s) o cliente (c)? ")
+    opcion = input("¿Desea ser servidor (s), cliente (c) o finalizar programa (f)? ")
 
     if opcion.lower() == 's':
         # Código para el servidor
-        host = input("Ingrese la direccion IP del servidor: ")
+        host = '0.0.0.0'
         port = 12345
 
         # Crear un objeto socket
@@ -147,6 +147,10 @@ while True:
     elif opcion.lower() == 'c':
         # Código para el cliente
         conectar_al_servidor()
+
+    elif opcion.lower() == 'f':
+        # Finalizar el programa
+        break
 
     else:
         print("Opción no válida. Intente de nuevo.")

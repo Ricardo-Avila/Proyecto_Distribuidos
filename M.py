@@ -45,6 +45,11 @@ def manejar_cliente(conn, addr):
         conn.close()
         del nombres_clientes[conn]
 
+        # Si todos los clientes se han desconectado, preguntar si desea reiniciar el servidor
+        if not nombres_clientes:
+            if not reiniciar_servidor():
+                break
+
     except Exception as e:
         print(f"Error de conexión con {nombre_cliente} ({addr}): {e}")
         del nombres_clientes[conn]
@@ -82,10 +87,6 @@ while True:
         for thread in threading.enumerate():
             if thread != threading.current_thread():
                 thread.join()
-
-        # Preguntar al usuario si desea reiniciar el servidor
-        if not reiniciar_servidor():
-            break
 
     except Exception as e:
         print(f"Error de servidor: {e}")

@@ -1,94 +1,68 @@
 import socket
 from datetime import datetime
-import threading
 
 # Dirección IP y puerto en el que el servidor escuchará
 host = '192.168.183.136'
 port = 12345
 
-# Diccionario para almacenar nombres de clientes
-nombres_clientes = {}
-contador_clientes = 1
-
-def manejar_cliente(conn, addr):
-    global contador_clientes
-
-    try:
-        # Asignar un nombre al cliente
-        nombre_cliente = f"Cliente {contador_clientes:02d}"
-        contador_clientes += 1
-        nombres_clientes[conn] = nombre_cliente
-
-        # Obtener la fecha y hora actual de la conexión
-        connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'Conexión establecida desde {addr} para {nombre_cliente} a las {connection_datetime}')
-
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                # Si el cliente se desconecta, mostrar el mensaje y la hora
-                disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f'{nombre_cliente} desconectado desde {addr} a las {disconnection_datetime}')
-                break
-
-            # Mostrar el mensaje recibido
-            print(f'Datos recibidos de {nombre_cliente} ({addr}): {data.decode()}')
-
-            # Obtener la fecha y hora actual
-            current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-            # Crear el mensaje de confirmación con la fecha y hora
-            confirmation_message = f"Mensaje de {nombre_cliente} ({addr}) recibido por el servidor el {current_datetime}."
-            conn.sendall(confirmation_message.encode())
-
-        # Cerrar la conexión después de salir del bucle interno
-        conn.close()
-        del nombres_clientes[conn]
-
-    except Exception as e:
-        print(f"Error de conexión con {nombre_cliente} ({addr}): {e}")
-        del nombres_clientes[conn]
-
-def reiniciar_servidor():
-    global nombres_clientes, contador_clientes
-    nombres_clientes = {}
-    contador_clientes = 1
-
-    # Preguntar al usuario si desea reiniciar el servidor
-    reiniciar = input("¿Desea reiniciar el servidor? (y/n): ")
-    return reiniciar.lower() == 'y'
-
-# Crear un objeto socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-# Vincular el socket al host y puerto
-s.bind((host, port))
+# Lista para almacenar conexiones de Máquina2 y sus nombres
+maquinas2_conectadas = []
 
 while True:
     try:
-        # Escuchar conexiones entrantes (máximo 5 conexiones en este ejemplo)
-        s.listen(5)
+        # Crear un objeto socket
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        # Vincular el socket al host y puerto
+        s.bind((host, port))
+
+        # Escuchar conexiones entrantes (máximo 2 conexiones en este ejemplo)
+        s.listen(2)
+
         print(f'Esperando conexiones en {host}:{port}...')
 
-        while len(nombres_clientes) < 5:
+        for i in range(2):
             # Aceptar la conexión entrante
             conn, addr = s.accept()
+            print(f'Conexión establecida desde {addr}')
 
-            # Iniciar un hilo para manejar el cliente
-            thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-            thread.start()
+            # Solicitar al usuario un nombre para la Máquina2
+            nombre_maquina = input(f'Ingrese un nombre para Máquina2_{i + 1}: ')
 
-        # Esperar a que todos los hilos terminen
-        for thread in threading.enumerate():
-            if thread != threading.current_thread():
-                thread.join()
+            # Agregar la conexión y el nombre a la lista
+            maquinas2_conectadas.append((conn, nombre_maquina))
 
-        # Preguntar al usuario si desea reiniciar el servidor
-        if not reiniciar_servidor():
-            break
+            # Obtener la fecha y hora actual de la conexión
+            connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f'Máquina2_{i + 1} ({nombre_maquina}) conectada a las {connection_datetime}')
+
+        while True:
+            for conn, nombre_maquina in maquinas2_conectadas:
+                data = conn.recv(1024)
+                if not data:
+                    # Si Máquina2 se desconecta, mostrar el mensaje y la hora
+                    disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    print(f'{nombre_maquina} desconectada a las {disconnection_datetime}')
+                    maquinas2_conectadas.remove((conn, nombre_maquina))
+                    break
+
+                # Mostrar el mensaje recibido
+                print(f'Datos recibidos de {nombre_maquina}: {data.decode()}')
+
+                # Obtener la fecha y hora actual
+                current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+                # Crear el mensaje de confirmación con la fecha y hora
+                confirmation_message = f"Mensaje de {nombre_maquina} recibido por el servidor el {current_datetime}."
+                conn.sendall(confirmation_message.encode())
+
+            # Preguntar al usuario si desea reiniciar el servidor o cerrar el programa
+            user_input = input("¿Desea reiniciar el servidor? (y/n): ")
+            if user_input.lower() != 'y':
+                break  # Terminar el programa
 
     except Exception as e:
-        print(f"Error de servidor: {e}")
+        print(f"Error de conexión: {e}")
 
-# Cerrar el socket principal después de salir del bucle principal
+# Cerrar el socket principal antes de salir del bucle principal
 s.close()

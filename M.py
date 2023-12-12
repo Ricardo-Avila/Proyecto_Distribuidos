@@ -1,10 +1,7 @@
 import socket
 from datetime import datetime
 import threading
-
-# Dirección IP y puerto en el que el servidor escuchará
-host = input("Ingrese la dirección IP del servidor: ")
-port = 12345
+import time
 
 def manejar_cliente(conn, addr):
     try:
@@ -37,28 +34,93 @@ def manejar_cliente(conn, addr):
         # Cerrar la conexión después de salir del bloque try
         conn.close()
 
-# Crear un objeto socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def conectar_al_servidor():
+    while True:
+        try:
+            # Solicitar al usuario que ingrese la dirección IP del servidor
+            server_ip = input("Ingrese la dirección IP del servidor (o escriba 'quit' para cerrar el programa): ")
+            
+            if server_ip.lower() == 'quit':
+                return  # Terminar el hilo y cerrar el programa
 
-# Vincular el socket al host y puerto
-s.bind((host, port))
+            # Solicitar al usuario que ingrese el puerto del servidor
+            server_port = input("Ingrese el puerto del servidor: ")
 
-# Escuchar conexiones entrantes (máximo 2 conexiones concurrentes en este ejemplo)
-s.listen(2)
+            # Crear un objeto socket
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-print(f'Esperando conexiones en {host}:{port}...')
+            # Conectar al servidor
+            s.connect((server_ip, int(server_port)))
 
+            # Obtener la fecha y hora actual de la conexión
+            connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print(f'Conectado al servidor en {server_ip}:{server_port} a las {connection_datetime}')
+
+            while True:
+                # Solicitar al usuario que ingrese un mensaje personalizado
+                user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
+
+                if user_input.lower() == 'quit':
+                    break
+
+                # Obtener la hora actual
+                current_time = datetime.now().strftime("%H:%M:%S")
+
+                # Crear el mensaje con la hora
+                full_message = f"[{current_time}] {user_input}"
+
+                # Enviar el mensaje al servidor
+                s.sendall(full_message.encode())
+                print(f'Mensaje enviado: {full_message}')
+
+                # Recibir la confirmación del servidor
+                confirmation = s.recv(1024)
+                print(f'Confirmación del servidor: {confirmation.decode()}')
+
+            # Cerrar la conexión
+            s.close()
+
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+
+        # Esperar antes de intentar nuevamente (por ejemplo, 5 segundos)
+        time.sleep(5)
+
+# Solicitar al usuario que elija ser servidor o cliente
 while True:
-    try:
-        # Aceptar la conexión entrante
-        conn, addr = s.accept()
+    opcion = input("¿Desea ser servidor (s) o cliente (c)? ")
 
-        # Iniciar un hilo para manejar la conexión del cliente
-        client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-        client_thread.start()
+    if opcion.lower() == 's':
+        # Código para el servidor
+        host = input("Ingrese la direccion IP del servidor: ")
+        port = 12345
 
-    except Exception as e:
-        print(f"Error de conexión: {e}")
+        # Crear un objeto socket
+        server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Cerrar el socket principal antes de salir del bucle principal
-s.close()
+        # Vincular el socket al host y puerto
+        server_socket.bind((host, port))
+
+        # Escuchar conexiones entrantes (máximo 2 conexiones concurrentes en este ejemplo)
+        server_socket.listen(2)
+
+        print(f'Esperando conexiones en {host}:{port}...')
+
+        while True:
+            try:
+                # Aceptar la conexión entrante
+                conn, addr = server_socket.accept()
+
+                # Iniciar un hilo para manejar la conexión del cliente
+                client_thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+                client_thread.start()
+
+            except Exception as e:
+                print(f"Error de conexión: {e}")
+
+    elif opcion.lower() == 'c':
+        # Código para el cliente
+        conectar_al_servidor()
+
+    else:
+        print("Opción no válida. Intente de nuevo.")

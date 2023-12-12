@@ -1,45 +1,51 @@
 import socket
 from datetime import datetime
 import threading
+import time
 
-def enviar_mensajes():
+def conectar_al_servidor():
     while True:
-        user_input = input("Ingrese su mensaje (o escriba 'exit' para salir): ")
-        
-        if user_input.lower() == 'exit':
-            break
-        
-        # Obtener la fecha y hora actual
-        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        
-        # Crear el mensaje con la fecha y hora
-        full_message = f"[{current_datetime}] {user_input}"
-        
-        # Enviar el mensaje al servidor
-        s.sendall(full_message.encode())
-        print(f'Mensaje enviado: {full_message}')
-        
-        # Recibir la confirmación del servidor
-        confirmation = s.recv(1024)
-        print(f'Confirmación del servidor: {confirmation.decode()}')
+        try:
+            # Dirección IP y puerto del servidor al que se conectará el cliente
+            host = '192.168.183.136'
+            port = 12345
 
-# Dirección IP y puerto del servidor al que se conectará el cliente
-host = '192.168.183.136'
-port = 12345
+            # Crear un objeto socket
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-# Crear un objeto socket
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # Conectar al servidor
+            s.connect((host, port))
+            print(f'Conectado al servidor en {host}:{port}')
 
-# Conectar al servidor
-s.connect((host, port))
-print(f'Conectado al servidor en {host}:{port}')
+            # Enviar una serie de mensajes al servidor
+            messages = ["Hola, servidor!", "¿Cómo estás?", "Este es otro mensaje."]
+            for message in messages:
+                # Obtener la hora actual
+                current_time = datetime.now().strftime("%H:%M:%S")
 
-# Iniciar un hilo para manejar la entrada del usuario y enviar mensajes
-thread = threading.Thread(target=enviar_mensajes)
+                # Crear el mensaje con la hora
+                full_message = f"[{current_time}] {message}"
+
+                # Enviar el mensaje al servidor
+                s.sendall(full_message.encode())
+                print(f'Mensaje enviado: {full_message}')
+
+                # Recibir la confirmación del servidor
+                confirmation = s.recv(1024)
+                print(f'Confirmación del servidor: {confirmation.decode()}')
+
+            # Cerrar la conexión
+            s.close()
+
+        except Exception as e:
+            print(f"Error de conexión: {e}")
+
+        # Esperar antes de intentar nuevamente (por ejemplo, 5 segundos)
+        time.sleep(5)
+
+# Iniciar un hilo para manejar la conexión al servidor
+thread = threading.Thread(target=conectar_al_servidor)
 thread.start()
 
-# Esperar a que el hilo termine (cuando el usuario escribe 'exit')
+# Esperar a que el hilo termine (puedes implementar una lógica diferente para manejar esto)
 thread.join()
-
-# Cerrar la conexión
-s.close()

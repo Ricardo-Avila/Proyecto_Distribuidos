@@ -1,58 +1,83 @@
 import socket
 from datetime import datetime
+import threading
 
 # Dirección IP y puerto en el que el servidor escuchará
 host = '192.168.183.136'
 port = 12345
 
-while True:
+# Lista para almacenar las conexiones de los clientes
+clientes = []
+
+def manejar_cliente(cliente, addr):
     try:
-        # Crear un objeto socket
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-        # Vincular el socket al host y puerto
-        s.bind((host, port))
-
-        # Escuchar conexiones entrantes (máximo 1 conexión en este ejemplo)
-        s.listen(1)
-
-        print(f'Esperando una conexión en {host}:{port}...')
-
-        # Aceptar la conexión entrante
-        conn, addr = s.accept()
-
         # Obtener la fecha y hora actual de la conexión
         connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         print(f'Conexión establecida desde {addr} a las {connection_datetime}')
 
         while True:
-            data = conn.recv(1024)
+            data = cliente.recv(1024)
             if not data:
-                # Si la máquina2 se desconecta, mostrar el mensaje y la hora
+                # Si el cliente se desconecta, mostrar el mensaje y la hora
                 disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f'Máquina2 desconectada a las {disconnection_datetime}')
+                print(f'Cliente desconectado ({addr}) a las {disconnection_datetime}')
                 break
 
             # Mostrar el mensaje recibido
-            print(f'Datos recibidos de Máquina2: {data.decode()}')
+            print(f'Datos recibidos de Cliente ({addr}): {data.decode()}')
 
             # Obtener la fecha y hora actual
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Crear el mensaje de confirmación con la fecha y hora
-            confirmation_message = f"Mensaje de Máquina2 recibido por el servidor el {current_datetime}."
-            conn.sendall(confirmation_message.encode())
+            confirmation_message = f"Mensaje de Cliente ({addr}) recibido por el servidor el {current_datetime}."
+            cliente.sendall(confirmation_message.encode())
 
         # Cerrar la conexión después de salir del bucle interno
-        conn.close()
+        cliente.close()
 
-        # Preguntar al usuario si desea reiniciar el servidor o cerrar el programa
-        user_input = input("¿Desea reiniciar el servidor? (y/n): ")
-        if user_input.lower() != 'y':
-            break  # Terminar el programa
+        # Eliminar la conexión del cliente de la lista
+        clientes.remove((cliente, addr))
+
+        # Verificar si todas las máquinas 02 se desconectaron
+        if not clientes:
+            reiniciar_servidor = input("¿Desea reiniciar el servidor? (y/n): ")
+            if reiniciar_servidor.lower() != 'y':
+                break  # Terminar el programa
 
     except Exception as e:
-        print(f"Error de conexión: {e}")
+        print(f"Error de conexión con Cliente ({addr}): {e}")
 
-# Cerrar el socket principal antes de salir del bucle principal
-s.close()
+def esperar_conexiones():
+    while True:
+        try:
+            # Crear un objeto socket
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+            # Vincular el socket al host y puerto
+            s.bind((host, port))
+
+            # Escuchar conexiones entrantes (hasta 5 conexiones en este ejemplo)
+            s.listen(5)
+
+            print(f'Esperando conexiones en {host}:{port}...')
+
+            # Aceptar la conexión entrante
+            cliente, addr = s.accept()
+
+            # Agregar la conexión del cliente a la lista
+            clientes.append((cliente, addr))
+
+            # Iniciar un hilo para manejar la conexión del cliente
+            thread = threading.Thread(target=manejar_cliente, args=(cliente, addr))
+            thread.start()
+
+        except Exception as e:
+            print(f"Error al esperar conexiones: {e}")
+
+# Iniciar un hilo para esperar conexiones
+thread = threading.Thread(target=esperar_conexiones)
+thread.start()
+
+# Esperar a que el hilo termine (puedes implementar una lógica diferente para manejar esto)
+thread.join()

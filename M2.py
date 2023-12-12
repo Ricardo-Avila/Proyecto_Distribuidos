@@ -19,11 +19,9 @@ def conectar_al_servidor():
 
             while True:
                 # Solicitar al usuario que ingrese un mensaje personalizado
-                user_input = input("Ingrese su mensaje (o escriba 'exit' para salir, 'quit' para cerrar el programa): ")
+                user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
 
-                if user_input.lower() == 'exit':
-                    break
-                elif user_input.lower() == 'quit':
+                if user_input.lower() == 'quit':
                     return  # Terminar el hilo y cerrar el programa
 
                 # Obtener la hora actual

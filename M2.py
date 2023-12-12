@@ -11,8 +11,10 @@ s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.connect((host, port))
 print(f'Conectado al servidor en {host}:{port}')
 
-# Enviar datos al servidor
-message = 'Hola, servidor!'
+# Solicitar al usuario que ingrese un mensaje personalizado
+message = input("Ingrese su mensaje: ")
+
+# Enviar el mensaje al servidor
 s.sendall(message.encode())
 
 # Cerrar la conexión

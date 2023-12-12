@@ -73,18 +73,21 @@ class Nodo:
                 conexion.send(mensaje.encode('utf-8'))
             except Exception as e:
                 print(f"Error al enviar mensaje: {str(e)}")
+def main():
+    # Configuración del nodo
+    host = '192.168.183.'  # Reemplazar con la dirección IP de la máquina local
+    puerto = 5555
+    
+    # Lista de direcciones IP de los nodos destino
+    nodos_destino = ['192.168.183.', '192.168.183.']
+    puertos_destino = [5555, 5556, 5557]
+    
+    # NODO 1 : 192.168.183.136
+    # NODO 2 : 192.168.183.147
+    # NODO 3 : 192.168.183.148
+    
+    nodo = Nodo(host, puerto)
+    nodo.iniciar(nodos_destino)
 
-# Configuración del nodo
-host = '192.168.183.'  # Reemplazar con la dirección IP de la máquina local
-puerto = 5555
-
-# Lista de direcciones IP de los nodos destino
-nodos_destino = ['192.168.183.', '192.168.183.']
-puertos_destino = [5555, 5556, 5557]
-
-# NODO 1 : 192.168.183.136
-# NODO 2 : 192.168.183.147
-# NODO 3 : 192.168.183.148
-
-nodo = Nodo(host, puerto)
-nodo.iniciar(nodos_destino)
+if __name__ == "__main__":
+    main()

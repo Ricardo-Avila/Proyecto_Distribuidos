@@ -63,7 +63,11 @@ while True:
         # Agregar el hilo a la lista
         threads.append(client_thread)
 
-        # Eliminar hilos terminados
+    except Exception as e:
+        print(f"Error de conexión: {e}")
+
+    finally:
+        # Eliminar hilos terminados de la lista
         threads = [thread for thread in threads if thread.is_alive()]
 
         # Si no hay más hilos activos, preguntar si se desea reiniciar o terminar el programa
@@ -71,9 +75,6 @@ while True:
             user_input = input("Todos los clientes se han desconectado. ¿Desea reiniciar el servidor? (y/n): ")
             if user_input.lower() != 'y':
                 break  # Terminar el programa
-
-    except Exception as e:
-        print(f"Error de conexión: {e}")
 
 # Esperar a que todos los hilos terminen antes de cerrar el socket principal
 for thread in threads:

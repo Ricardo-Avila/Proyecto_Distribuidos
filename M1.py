@@ -29,11 +29,11 @@ while True:
     # Mostrar el mensaje recibido
     print(f'Datos recibidos del cliente: {data.decode()}')
     
-    # Obtener la hora actual
-    current_time = datetime.now().strftime("%H:%M:%S")
+    # Obtener la fecha y hora actual
+    current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
     
-    # Crear el mensaje de confirmación con la hora
-    confirmation_message = f"Mensaje recibido por el servidor a las {current_time}."
+    # Crear el mensaje de confirmación con la fecha y hora
+    confirmation_message = f"Mensaje recibido por el servidor el {current_datetime}."
     conn.sendall(confirmation_message.encode())
 
 # Cerrar la conexión después de salir del bucle

@@ -9,11 +9,11 @@ def enviar_mensajes():
         if user_input.lower() == 'exit':
             break
         
-        # Obtener la hora actual
-        current_time = datetime.now().strftime("%H:%M:%S")
+        # Obtener la fecha y hora actual
+        current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         
-        # Crear el mensaje con la hora
-        full_message = f"[{current_time}] {user_input}"
+        # Crear el mensaje con la fecha y hora
+        full_message = f"[{current_datetime}] {user_input}"
         
         # Enviar el mensaje al servidor
         s.sendall(full_message.encode())

@@ -32,11 +32,13 @@ class Nodo:
             cliente, addr = self.servidor_socket.accept()
             self.conexiones.append(cliente)
             print(f"Socket aceptado.......")
+            sys.stdout.flush()
 
             # Configurar hilo para manejar la conexión entrante
             hilo_cliente = threading.Thread(target=self.manejar_cliente, args=(cliente,))
             hilo_cliente.start()
             print(f"Hilo iniciado.....")
+            sys.stdout.flush()
 
     def conectar_a_nodos(self, nodos_destino):
         # Configurar conexiones a otros nodos
@@ -60,7 +62,9 @@ class Nodo:
             except Exception as e:
                 print(f"Error al recibir mensajes: {str(e)}")
                 break
-
+        # Cerrar el socket al salir del bucle
+        cliente.close()
+        
     def enviar_a_todos(self, mensaje):
         for conexion in self.conexiones:
             try:

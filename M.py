@@ -49,29 +49,46 @@ def manejar_cliente(conn, addr):
         print(f"Error de conexión con {nombre_cliente} ({addr}): {e}")
         del nombres_clientes[conn]
 
+def reiniciar_servidor():
+    global nombres_clientes, contador_clientes
+    nombres_clientes = {}
+    contador_clientes = 1
+
+    # Preguntar al usuario si desea reiniciar el servidor
+    reiniciar = input("¿Desea reiniciar el servidor? (y/n): ")
+    return reiniciar.lower() == 'y'
+
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 # Vincular el socket al host y puerto
 s.bind((host, port))
 
-# Escuchar conexiones entrantes (máximo 5 conexiones en este ejemplo)
-s.listen(5)
+while True:
+    try:
+        # Escuchar conexiones entrantes (máximo 5 conexiones en este ejemplo)
+        s.listen(5)
+        print(f'Esperando conexiones en {host}:{port}...')
 
-print(f'Esperando conexiones en {host}:{port}...')
+        while len(nombres_clientes) < 5:
+            # Aceptar la conexión entrante
+            conn, addr = s.accept()
 
-while len(nombres_clientes) < 5:
-    # Aceptar la conexión entrante
-    conn, addr = s.accept()
+            # Iniciar un hilo para manejar el cliente
+            thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
+            thread.start()
 
-    # Iniciar un hilo para manejar el cliente
-    thread = threading.Thread(target=manejar_cliente, args=(conn, addr))
-    thread.start()
+        # Esperar a que todos los hilos terminen
+        for thread in threading.enumerate():
+            if thread != threading.current_thread():
+                thread.join()
 
-# Esperar a que todos los hilos terminen
-for thread in threading.enumerate():
-    if thread != threading.current_thread():
-        thread.join()
+        # Preguntar al usuario si desea reiniciar el servidor
+        if not reiniciar_servidor():
+            break
+
+    except Exception as e:
+        print(f"Error de servidor: {e}")
 
 # Cerrar el socket principal después de salir del bucle principal
 s.close()

@@ -17,14 +17,18 @@ def conectar_al_servidor():
             s.connect((host, port))
             print(f'Conectado al servidor en {host}:{port}')
 
-            # Enviar una serie de mensajes al servidor
-            messages = ["Hola, servidor!", "¿Cómo estás?", "Este es otro mensaje."]
-            for message in messages:
+            while True:
+                # Solicitar al usuario que ingrese un mensaje personalizado
+                user_input = input("Ingrese su mensaje (o escriba 'exit' para salir): ")
+
+                if user_input.lower() == 'exit':
+                    break
+
                 # Obtener la hora actual
                 current_time = datetime.now().strftime("%H:%M:%S")
 
                 # Crear el mensaje con la hora
-                full_message = f"[{current_time}] {message}"
+                full_message = f"[{current_time}] {user_input}"
 
                 # Enviar el mensaje al servidor
                 s.sendall(full_message.encode())

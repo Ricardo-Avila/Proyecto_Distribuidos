@@ -6,40 +6,48 @@ import threading
 host = '192.168.183.136'
 port = 12345
 
-# Lista para almacenar conexiones activas
-conexiones = []
+# Diccionario para almacenar nombres de clientes
+nombres_clientes = {}
+contador_clientes = 1
 
 def manejar_cliente(conn, addr):
+    global contador_clientes
+
     try:
+        # Asignar un nombre al cliente
+        nombre_cliente = f"Cliente {contador_clientes:02d}"
+        contador_clientes += 1
+        nombres_clientes[conn] = nombre_cliente
+
         # Obtener la fecha y hora actual de la conexión
         connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f'Conexión establecida desde {addr} a las {connection_datetime}')
+        print(f'Conexión establecida desde {addr} para {nombre_cliente} a las {connection_datetime}')
 
         while True:
             data = conn.recv(1024)
             if not data:
-                # Si la máquina2 se desconecta, mostrar el mensaje y la hora
+                # Si el cliente se desconecta, mostrar el mensaje y la hora
                 disconnection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                print(f'Máquina2 desconectada desde {addr} a las {disconnection_datetime}')
+                print(f'{nombre_cliente} desconectado desde {addr} a las {disconnection_datetime}')
                 break
 
             # Mostrar el mensaje recibido
-            print(f'Datos recibidos de Máquina2 ({addr}): {data.decode()}')
+            print(f'Datos recibidos de {nombre_cliente} ({addr}): {data.decode()}')
 
             # Obtener la fecha y hora actual
             current_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
             # Crear el mensaje de confirmación con la fecha y hora
-            confirmation_message = f"Mensaje de Máquina2 ({addr}) recibido por el servidor el {current_datetime}."
+            confirmation_message = f"Mensaje de {nombre_cliente} ({addr}) recibido por el servidor el {current_datetime}."
             conn.sendall(confirmation_message.encode())
 
         # Cerrar la conexión después de salir del bucle interno
         conn.close()
-        conexiones.remove(conn)
+        del nombres_clientes[conn]
 
     except Exception as e:
-        print(f"Error de conexión con Máquina2 ({addr}): {e}")
-        conexiones.remove(conn)
+        print(f"Error de conexión con {nombre_cliente} ({addr}): {e}")
+        del nombres_clientes[conn]
 
 # Crear un objeto socket
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -52,10 +60,9 @@ s.listen(5)
 
 print(f'Esperando conexiones en {host}:{port}...')
 
-while len(conexiones) < 5:
+while len(nombres_clientes) < 5:
     # Aceptar la conexión entrante
     conn, addr = s.accept()
-    conexiones.append(conn)
 
     # Iniciar un hilo para manejar el cliente
     thread = threading.Thread(target=manejar_cliente, args=(conn, addr))

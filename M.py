@@ -4,6 +4,9 @@ import threading
 
 # Objeto compartido para rastrear el estado de conexión y el número de clientes conectados
 estado_conexion = {'conectado': False, 'clientes_conectados': 0}
+servidores = ['192.183.168.136', '192.183.168.147', '192.183.168.148', '192.183.168.149', '192.183.168.150']
+hostname = socket.gethostbyname(socket.gethostname())
+print(f'Dirección IP de la máquina actual: {hostname}')
 
 def manejar_cliente(conn, addr):
     try:
@@ -50,53 +53,51 @@ def manejar_cliente(conn, addr):
         conn.close()
 
 def conectar_al_servidor():
+    global conectado
+
     while True:
         try:
-            # Solicitar al usuario que ingrese la dirección IP del servidor
-            server_ip = input("Ingrese la dirección IP del servidor (o escriba 'quit' para cerrar el programa): ")
-            
-            if server_ip.lower() == 'quit':
-                return  # Terminar el hilo y cerrar el programa
+            # Solicitar al usuario que ingrese un mensaje personalizado
+            user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
 
-            # Solicitar al usuario que ingrese el puerto del servidor
-            server_port = 12345
+            if user_input.lower() == 'quit':
+                # Si el usuario escribe 'quit', salir del bucle
+                break
 
-            # Crear un objeto socket
-            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            # Obtener la hora actual
+            current_time = datetime.now().strftime("%H:%M:%S")
 
-            # Conectar al servidor
-            s.connect((server_ip, int(server_port)))
+            # Crear el mensaje con la hora
+            full_message = f"[{current_time}] {user_input}"
 
-            # Obtener la fecha y hora actual de la conexión
-            connection_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            print(f'Conectado al servidor en {server_ip}:{server_port} a las {connection_datetime}')
+            # Iterar sobre la lista de servidores y enviar el mensaje a cada uno
+            for servidor in servidores:
+                try:
+                    # Crear un objeto socket
+                    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-            while True:
-                # Solicitar al usuario que ingrese un mensaje personalizado
-                user_input = input("Ingrese su mensaje (o escriba 'quit' para cerrar el programa): ")
+                    # Conectar al servidor
+                    s.connect((servidor, puerto_servidor))
 
-                if user_input.lower() == 'quit':
-                    break
+                    # Enviar el mensaje al servidor
+                    s.sendall(full_message.encode())
+                    print(f'Mensaje enviado a {servidor}: {full_message}')
 
-                # Obtener la hora actual
-                current_time = datetime.now().strftime("%H:%M:%S")
+                    # Recibir la confirmación del servidor
+                    confirmation = s.recv(1024)
+                    print(f'Confirmación del servidor {servidor}: {confirmation.decode()}')
 
-                # Crear el mensaje con la hora
-                full_message = f"[{current_time}] {user_input}"
+                    # Cerrar la conexión
+                    s.close()
 
-                # Enviar el mensaje al servidor
-                s.sendall(full_message.encode())
-                print(f'Mensaje enviado: {full_message}')
+                except Exception as e:
+                    print(f"Error de conexión con {servidor}: {e}")
 
-                # Recibir la confirmación del servidor
-                confirmation = s.recv(1024)
-                print(f'Confirmación del servidor: {confirmation.decode()}')
-
-            # Cerrar la conexión
-            s.close()
+            # Establecer conectado en False después de enviar los mensajes
+            conectado = False
 
         except Exception as e:
-            print(f"Error de conexión: {e}")
+            print(f"Error de entrada: {e}")
 
 # Solicitar al usuario que elija ser servidor, cliente o finalizar programa
 while True:

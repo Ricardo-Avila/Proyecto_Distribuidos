@@ -2,11 +2,32 @@ import socket
 from datetime import datetime
 import threading
 
+# Obtener la dirección IP de la interfaz de red deseada
+def obtener_direccion_ip():
+    try:
+        # Crear un socket de prueba para obtener la dirección IP
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        direccion_ip = s.getsockname()[0]
+        s.close()
+        return direccion_ip
+    except Exception as e:
+        print(f"Error al obtener la dirección IP: {e}")
+        return None
+
+# Dirección IP de la máquina actual
+hostname = obtener_direccion_ip()
+
+# Verificar si se obtuvo la dirección IP correctamente
+if hostname:
+    print(f"Dirección IP de la máquina actual: {hostname}")
+else:
+    print("No se pudo obtener la dirección IP. Saliendo del programa.")
+    exit()
+    
 # Objeto compartido para rastrear el estado de conexión y el número de clientes conectados
 estado_conexion = {'conectado': False, 'clientes_conectados': 0}
 servidores = ['192.183.168.136', '192.183.168.147', '192.183.168.148', '192.183.168.149', '192.183.168.150']
-hostname = socket.gethostbyname(socket.gethostname())
-
 
 def manejar_cliente(conn, addr):
     try:

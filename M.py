@@ -6,7 +6,7 @@ import threading
 estado_conexion = {'conectado': False, 'clientes_conectados': 0}
 servidores = ['192.183.168.136', '192.183.168.147', '192.183.168.148', '192.183.168.149', '192.183.168.150']
 hostname = socket.gethostbyname(socket.gethostname())
-print(f'Dirección IP de la máquina actual: {hostname}')
+
 
 def manejar_cliente(conn, addr):
     try:
@@ -105,7 +105,8 @@ while True:
 
     if opcion.lower() == 's':
         # Código para el servidor
-        host = input("Ingrese la direccion IP de su servidor: ")
+        host = hostname
+        print(f'Dirección IP de la máquina actual: {hostname}')
         port = 12345
 
         # Crear un objeto socket

@@ -28,6 +28,8 @@ else:
 # Objeto compartido para rastrear el estado de conexión y el número de clientes conectados
 estado_conexion = {'conectado': False, 'clientes_conectados': 0}
 servidores = ['192.183.168.136', '192.183.168.147', '192.183.168.148', '192.183.168.149', '192.183.168.150']
+# Filtrar la lista para excluir la dirección IP de la máquina actual
+servidores = [ip for ip in servidores if ip != hostname]
 
 def manejar_cliente(conn, addr):
     try:
